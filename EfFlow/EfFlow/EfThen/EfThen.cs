@@ -1,4 +1,4 @@
-﻿namespace EFFlow.EfThen
+﻿namespace EfFlow.EfThen
 {
     using System;
     using System.Collections.Generic;
@@ -8,75 +8,68 @@
     using System.Linq.Expressions;
     using System.Reflection;
 
-    using EFFlow.EFGiven;
+    using EfFlow.EfGiven;
 
     using TechTalk.SpecFlow;
 
     /// <summary>
-    /// The Entity Framework Then clause.
+    ///     The Entity Framework Then clause.
     /// </summary>
     /// <typeparam name="T">
-    /// Entity's type.
+    ///     Entity's type.
     /// </typeparam>
-    public class EfThen<T> where T : class
+    public class EfThen<T>
+        where T : class
     {
-        #region < Fields >
-
         /// <summary>
-        /// The database context.
+        ///     The collection includes.
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation", Justification = "Reviewed. Suppression is OK here.")]
-        private DbContext dbContext;
+        private readonly List<CollectionIncludeInfo> collectionIncludes = new List<CollectionIncludeInfo>();
 
         /// <summary>
-        /// The lookup properties.
+        ///     The database context.
         /// </summary>
-        private List<LookupProperty> lookupProperties = new List<LookupProperty>();
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation",
+             Justification = "Reviewed. Suppression is OK here.")]
+        private readonly DbContext dbContext;
 
         /// <summary>
-        /// The includes.
+        ///     The includes.
         /// </summary>
-        private List<Expression<Func<T, object>>> includes = new List<Expression<Func<T, object>>>();
+        private readonly List<Expression<Func<T, object>>> includes = new List<Expression<Func<T, object>>>();
 
         /// <summary>
-        /// The collection includes.
+        ///     The lookup properties.
         /// </summary>
-        private List<CollectionIncludeInfo> collectionIncludes = new List<CollectionIncludeInfo>();
-
-        #endregion
-
-        #region < Constructors >
+        private readonly List<LookupProperty> lookupProperties = new List<LookupProperty>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfThen{T}"/> class.
+        ///     Initializes a new instance of the <see cref="EfThen{T}" /> class.
         /// </summary>
         /// <param name="dbContext">
-        /// The database context.
+        ///     The database context.
         /// </param>
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation", Justification = "Reviewed. Suppression is OK here.")]
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation",
+             Justification = "Reviewed. Suppression is OK here.")]
         public EfThen(DbContext dbContext)
         {
             this.dbContext = dbContext;
         }
 
-        #endregion
-
-        #region < Methods >
-
         /// <summary>
-        /// Gets the property info of a given entity..
+        ///     Gets the property info of a given entity..
         /// </summary>
         /// <param name="source">
-        /// The source.
+        ///     The source.
         /// </param>
         /// <param name="propertyLambda">
-        /// The property lambda.
+        ///     The property lambda.
         /// </param>
         /// <returns>
-        /// The <see cref="PropertyInfo"/>.
+        ///     The <see cref="PropertyInfo" />.
         /// </returns>
         /// <exception cref="ArgumentException">
-        /// The exception.
+        ///     The exception.
         /// </exception>
         public static PropertyInfo GetPropertyInfo(T source, LambdaExpression propertyLambda)
         {
@@ -96,37 +89,38 @@
                 throw new ArgumentException($"Expression '{propertyLambda}' refers to a field, not a property.");
             }
 
-            if (type != propInfo.ReflectedType && !type.IsSubclassOf(propInfo.ReflectedType))
+            if ((type != propInfo.ReflectedType) && !type.IsSubclassOf(propInfo.ReflectedType))
             {
-                throw new ArgumentException($"Expresion '{propertyLambda}' refers to a property that is not from type {type}.");
+                throw new ArgumentException(
+                          $"Expresion '{propertyLambda}' refers to a property that is not from type {type}.");
             }
 
             return propInfo;
         }
 
         /// <summary>
-        /// The collection include.
+        ///     The collection include.
         /// </summary>
         /// <param name="include">
-        /// The include.
+        ///     The include.
         /// </param>
         /// <param name="columnPrefix">
-        /// The column prefix.
+        ///     The column prefix.
         /// </param>
         /// <param name="hierarchyProperty">
-        /// The hierarchy property.
+        ///     The hierarchy property.
         /// </param>
         /// <param name="cellDelegate">
-        /// The cell delegate.
+        ///     The cell delegate.
         /// </param>
         /// <typeparam name="T1">
-        /// First entity's type.
+        ///     First entity's type.
         /// </typeparam>
         /// <typeparam name="T2">
-        /// Second entity's type.
+        ///     Second entity's type.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="EfThen"/>.
+        ///     The <see cref="EfThen" />.
         /// </returns>
         public EfThen<T> CollectionInclude<T1, T2>(
             Expression<Func<T, ICollection<T1>>> include,
@@ -140,28 +134,28 @@
                         ColumnPrefix = columnPrefix,
                         IncludeEntityCellDelegate = cellDelegate,
                         Include = include,
-                        HierarchyProperty = hierarchyProperty,
+                        HierarchyProperty = hierarchyProperty
                     });
             return this;
         }
 
         /// <summary>
-        /// The collection include.
+        ///     The collection include.
         /// </summary>
         /// <param name="include">
-        /// The include.
+        ///     The include.
         /// </param>
         /// <param name="columnPrefix">
-        /// The column prefix.
+        ///     The column prefix.
         /// </param>
         /// <param name="cellDelegate">
-        /// The cell delegate.
+        ///     The cell delegate.
         /// </param>
         /// <typeparam name="T1">
-        /// Entity's type.
+        ///     Entity's type.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="EfThen"/>.
+        ///     The <see cref="EfThen" />.
         /// </returns>
         public EfThen<T> CollectionInclude<T1>(
             Expression<Func<T, ICollection<T1>>> include,
@@ -174,96 +168,27 @@
                         ColumnPrefix = columnPrefix,
                         IncludeEntityCellDelegate = cellDelegate,
                         Include = include,
-                        HierarchyProperty = null,
+                        HierarchyProperty = null
                     });
 
             return this;
         }
 
         /// <summary>
-        /// The include.
-        /// </summary>
-        /// <param name="included">
-        /// The included.
-        /// </param>
-        /// <returns>
-        /// The <see cref="EfThen"/>.
-        /// </returns>
-        /// <exception cref="Exception">
-        /// The exception.
-        /// </exception>
-        public EfThen<T> Include(Expression<Func<T, object>> included)
-        {
-            // Verify the properties are not in lists objects, otherwise an exception should be thrown.
-            var propertyInfo = (PropertyInfo)((MemberExpression)included.Body).Member;
-
-            if (typeof(ICollection<>).IsAssignableFrom(propertyInfo.PropertyType))
-            {
-                throw new Exception("Exception: a list type was found in the properties of the list of includes");
-            }
-
-            this.includes.Add(included);
-
-            return this;
-        }
-
-        /// <summary>
-        /// The lookup property method.
-        /// </summary>
-        /// <param name="lookupProperty">
-        /// The lookup property.
-        /// </param>
-        /// <typeparam name="T2">
-        /// Entity's type.
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="EfThen"/>.
-        /// </returns>
-        public EfThen<T> LookupProperty<T2>(Expression<Func<T, T2>> lookupProperty)
-        {
-            this.lookupProperties.Add(new LookupProperty { LookupExpression = lookupProperty, DefaultValue = null, });
-
-            return this;
-        }
-
-        /// <summary>
-        /// The lookup property method.
-        /// </summary>
-        /// <param name="lookupProperty">
-        /// The lookup property.
-        /// </param>
-        /// <param name="defaultValue">
-        /// The default value.
-        /// </param>
-        /// <typeparam name="T2">
-        /// Entity's type.
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="EfThen"/>.
-        /// </returns>
-        public EfThen<T> LookupProperty<T2>(Expression<Func<T, T2>> lookupProperty, T2 defaultValue = null) where T2 : class
-        {
-            this.lookupProperties.Add(
-                new LookupProperty { LookupExpression = lookupProperty, DefaultValue = defaultValue, });
-
-            return this;
-        }
-
-        /// <summary>
-        /// Compares the created entities to the entities in the given Table.
+        ///     Compares the created entities to the entities in the given Table.
         /// </summary>
         /// <param name="table">
-        /// The table.
+        ///     The table.
         /// </param>
         /// <returns>
-        /// The <see cref="System.Collections.Generic.List{T}"/>.
+        ///     The <see cref="System.Collections.Generic.List{T}" />.
         /// </returns>
         /// <exception cref="Exception">
-        /// The exception.
+        ///     The exception.
         /// </exception>
         public List<T> Execute(Table table)
         {
-            if (this.lookupProperties == null || !this.lookupProperties.Any())
+            if ((this.lookupProperties == null) || !this.lookupProperties.Any())
             {
                 throw new Exception("No lookup properties provided for Then clause.");
             }
@@ -317,7 +242,8 @@
 
             for (var hierarchyLevel = 1; hierarchyLevel <= maxHierarchyLevel; hierarchyLevel++)
             {
-                var indexes = parsedTree.Where(x => x.Value.HierarchyLevel == hierarchyLevel).Select(x => x.Key).ToList();
+                var indexes =
+                    parsedTree.Where(x => x.Value.HierarchyLevel == hierarchyLevel).Select(x => x.Key).ToList();
 
                 for (var i = 0; i < table.RowCount; i++)
                 {
@@ -341,13 +267,108 @@
         }
 
         /// <summary>
-        /// The get entity property names.
+        ///     The include.
         /// </summary>
-        /// <param name="type">
-        /// The type.
+        /// <param name="included">
+        ///     The included.
         /// </param>
         /// <returns>
-        /// The <see cref="System.Collections.Generic.List{String}"/>.
+        ///     The <see cref="EfThen" />.
+        /// </returns>
+        /// <exception cref="Exception">
+        ///     The exception.
+        /// </exception>
+        public EfThen<T> Include(Expression<Func<T, object>> included)
+        {
+            // Verify the properties are not in lists objects, otherwise an exception should be thrown.
+            var propertyInfo = (PropertyInfo)((MemberExpression)included.Body).Member;
+
+            if (typeof(ICollection<>).IsAssignableFrom(propertyInfo.PropertyType))
+            {
+                throw new Exception("Exception: a list type was found in the properties of the list of includes");
+            }
+
+            this.includes.Add(included);
+
+            return this;
+        }
+
+        /// <summary>
+        ///     The lookup property method.
+        /// </summary>
+        /// <param name="lookupProperty">
+        ///     The lookup property.
+        /// </param>
+        /// <typeparam name="T2">
+        ///     Entity's type.
+        /// </typeparam>
+        /// <returns>
+        ///     The <see cref="EfThen" />.
+        /// </returns>
+        public EfThen<T> LookupProperty<T2>(Expression<Func<T, T2>> lookupProperty)
+        {
+            this.lookupProperties.Add(new LookupProperty { LookupExpression = lookupProperty, DefaultValue = null });
+
+            return this;
+        }
+
+        /// <summary>
+        ///     The lookup property method.
+        /// </summary>
+        /// <param name="lookupProperty">
+        ///     The lookup property.
+        /// </param>
+        /// <param name="defaultValue">
+        ///     The default value.
+        /// </param>
+        /// <typeparam name="T2">
+        ///     Entity's type.
+        /// </typeparam>
+        /// <returns>
+        ///     The <see cref="EfThen" />.
+        /// </returns>
+        public EfThen<T> LookupProperty<T2>(Expression<Func<T, T2>> lookupProperty, T2 defaultValue = null)
+            where T2 : class
+        {
+            this.lookupProperties.Add(
+                new LookupProperty { LookupExpression = lookupProperty, DefaultValue = defaultValue });
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Build the expression from the lookup properties values.
+        /// </summary>
+        /// <param name="lookupPropertiesValues">
+        ///     The lookup properties values.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="Expression" />.
+        /// </returns>
+        private static Expression<Func<T, bool>> BuildLookupExpression(
+            Dictionary<string, object> lookupPropertiesValues)
+        {
+            var pe = Expression.Parameter(typeof(T), "x");
+
+            var left = (from lookupPropertyValue in lookupPropertiesValues
+                        let property = Expression.Property(pe, lookupPropertyValue.Key)
+                        let constant = Expression.Constant(lookupPropertyValue.Value)
+                        select Expression.Equal(property, Expression.Convert(constant, property.Type)))
+                .Aggregate<Expression, Expression>(
+                    null,
+                    (current, equality) => current == null ? equality : Expression.AndAlso(current, equality));
+
+            return Expression.Lambda<Func<T, bool>>(left, pe);
+        }
+
+        /// <summary>
+        ///     The get entity property names.
+        /// </summary>
+        /// <param name="type">
+        ///     The type.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="System.Collections.Generic.List{String}" />.
         /// </returns>
         private static List<string> GetEntityPropertyNames(Type type)
         {
@@ -357,35 +378,13 @@
         }
 
         /// <summary>
-        /// Build the expression from the lookup properties values.
-        /// </summary>
-        /// <param name="lookupPropertiesValues">
-        /// The lookup properties values.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Expression"/>.
-        /// </returns>
-        private static Expression<Func<T, bool>> BuildLookupExpression(Dictionary<string, object> lookupPropertiesValues)
-        {
-            var pe = Expression.Parameter(typeof(T), "x");
-
-            var left = (from lookupPropertyValue in lookupPropertiesValues
-                        let property = Expression.Property(pe, lookupPropertyValue.Key)
-                        let constant = Expression.Constant(lookupPropertyValue.Value)
-                        select Expression.Equal(property, Expression.Convert(constant, property.Type)))
-                        .Aggregate<Expression, Expression>(null, (current, equality) => current == null ? equality : Expression.AndAlso(current, equality));
-
-            return Expression.Lambda<Func<T, bool>>(left, pe);
-        }
-
-        /// <summary>
-        /// The add includes.
+        ///     The add includes.
         /// </summary>
         /// <param name="query">
-        /// The query.
+        ///     The query.
         /// </param>
         /// <returns>
-        /// The <see cref="IQueryable"/>.
+        ///     The <see cref="IQueryable" />.
         /// </returns>
         private IQueryable<T> AddIncludes(IQueryable<T> query)
         {
@@ -395,16 +394,73 @@
         }
 
         /// <summary>
-        /// The check included collections 1.
+        ///     Build the expression from the lookup properties, if the property info is null, an exception is thrown.
         /// </summary>
         /// <param name="entity">
-        /// The entity.
+        ///     The entity.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="Expression" />.
+        /// </returns>
+        /// <exception cref="Exception">
+        ///     The exception.
+        /// </exception>
+        private Expression<Func<T, bool>> BuildLookupExpression(T entity)
+        {
+            var lookupPropertiesValues = new Dictionary<string, object>();
+
+            foreach (var lookupProperty in this.lookupProperties)
+            {
+                var propertyInfo = GetPropertyInfo(entity, lookupProperty.LookupExpression);
+
+                if (propertyInfo == null)
+                {
+                    throw new Exception("Invalid lookup property");
+                }
+
+                lookupPropertiesValues.Add(propertyInfo.Name, propertyInfo.GetValue(entity));
+            }
+
+            return BuildLookupExpression(lookupPropertiesValues);
+        }
+
+        /// <summary>
+        ///     Check if all the properties of the given entities are the same.
+        /// </summary>
+        /// <param name="entity">
+        ///     The entity.
+        /// </param>
+        /// <param name="entityToCheck">
+        ///     The entity to check.
+        /// </param>
+        /// <param name="propertiesToCheck">
+        ///     The properties to check.
+        /// </param>
+        /// <exception cref="Exception">
+        ///     The exception.
+        /// </exception>
+        private void CheckEntity(T entity, T entityToCheck, List<LambdaExpression> propertiesToCheck)
+        {
+            if (
+                propertiesToCheck.Cast<dynamic>()
+                    .Select(propertyToCheck => propertyToCheck.Compile())
+                    .Any(func => func(entity) != func(entityToCheck)))
+            {
+                throw new Exception("Invalid property value");
+            }
+        }
+
+        /// <summary>
+        ///     The check included collections 1.
+        /// </summary>
+        /// <param name="entity">
+        ///     The entity.
         /// </param>
         /// <param name="table">
-        /// The table.
+        ///     The table.
         /// </param>
         /// <param name="tableRow">
-        /// The table row.
+        ///     The table row.
         /// </param>
         private void CheckIncludedCollections1(T entity, Table table, TableRow tableRow)
         {
@@ -425,21 +481,25 @@
         }
 
         /// <summary>
-        /// The check included collections 2.
+        ///     The check included collections 2.
         /// </summary>
         /// <param name="entity">
-        /// The entity.
+        ///     The entity.
         /// </param>
         /// <param name="tableRow">
-        /// The table row.
+        ///     The table row.
         /// </param>
         /// <param name="headers">
-        /// The headers.
+        ///     The headers.
         /// </param>
         /// <param name="rowKey">
-        /// The row key.
+        ///     The row key.
         /// </param>
-        private void CheckIncludedCollections2(T entity, TableRow tableRow, ICollection<string> headers, string[] rowKey)
+        private void CheckIncludedCollections2(
+            T entity,
+            TableRow tableRow,
+            ICollection<string> headers,
+            string[] rowKey)
         {
             var hierarchyIdentifier = this.collectionIncludes.FindMatch(rowKey);
 
@@ -458,16 +518,16 @@
         }
 
         /// <summary>
-        /// Build a list of properties to check from the table.
+        ///     Build a list of properties to check from the table.
         /// </summary>
         /// <param name="headers">
-        /// The headers.
+        ///     The headers.
         /// </param>
         /// <returns>
-        /// The <see cref="System.Collections.Generic.List{LambdaExpression}"/>.
+        ///     The <see cref="System.Collections.Generic.List{LambdaExpression}" />.
         /// </returns>
         /// <exception cref="Exception">
-        /// The exception.
+        ///     The exception.
         /// </exception>
         private List<LambdaExpression> GeneratePropertiesToCheck(ICollection<string> headers)
         {
@@ -501,64 +561,5 @@
 
             return listExpressions;
         }
-
-        /// <summary>
-        /// Build the expression from the lookup properties, if the property info is null, an exception is thrown.
-        /// </summary>
-        /// <param name="entity">
-        /// The entity.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Expression"/>.
-        /// </returns>
-        /// <exception cref="Exception">
-        /// The exception.
-        /// </exception>
-        private Expression<Func<T, bool>> BuildLookupExpression(T entity)
-        {
-            var lookupPropertiesValues = new Dictionary<string, object>();
-
-            foreach (var lookupProperty in this.lookupProperties)
-            {
-                var propertyInfo = GetPropertyInfo(entity, lookupProperty.LookupExpression);
-
-                if (propertyInfo == null)
-                {
-                    throw new Exception("Invalid lookup property");
-                }
-
-                lookupPropertiesValues.Add(propertyInfo.Name, propertyInfo.GetValue(entity));
-            }
-
-            return BuildLookupExpression(lookupPropertiesValues);
-        }
-
-        /// <summary>
-        /// Check if all the properties of the given entities are the same.
-        /// </summary>
-        /// <param name="entity">
-        /// The entity.
-        /// </param>
-        /// <param name="entityToCheck">
-        /// The entity to check.
-        /// </param>
-        /// <param name="propertiesToCheck">
-        /// The properties to check.
-        /// </param>
-        /// <exception cref="Exception">
-        /// The exception.
-        /// </exception>
-        private void CheckEntity(T entity, T entityToCheck, List<LambdaExpression> propertiesToCheck)
-        {
-            if (propertiesToCheck
-                .Cast<dynamic>()
-                .Select(propertyToCheck => propertyToCheck.Compile())
-                .Any(func => func(entity) != func(entityToCheck)))
-            {
-                throw new Exception("Invalid property value");
-            }
-        }
-
-        #endregion
     }
 }

@@ -1,31 +1,31 @@
-﻿namespace EFFlow.EFGiven
+﻿namespace EfFlow.EfGiven
 {
     using System;
     using System.Linq.Expressions;
     using System.Reflection;
 
     /// <summary>
-    /// The clauses helper.
+    ///     The clauses helper.
     /// </summary>
     public class ClausesHelper
     {
         /// <summary>
-        /// The set properties values.
+        ///     The set properties values.
         /// </summary>
         /// <param name="entity">
-        /// The entity.
+        ///     The entity.
         /// </param>
         /// <param name="valueExpression">
-        /// The value expression.
+        ///     The value expression.
         /// </param>
         /// <param name="overwriteValue">
-        /// The overwrite value.
+        ///     The overwrite value.
         /// </param>
         /// <typeparam name="T">
-        /// The entity's type.
+        ///     The entity's type.
         /// </typeparam>
         /// <exception cref="Exception">
-        /// The exception.
+        ///     The exception.
         /// </exception>
         public static void SetPropertiesValues<T>(T entity, Tuple<object, object> valueExpression, bool overwriteValue)
         {

@@ -13,23 +13,21 @@
     using System.Text.RegularExpressions;
 
     /// <summary>
-    /// The data context extensions.
+    ///     The data context extensions.
     /// </summary>
     public static class DataContextExtensions
     {
-        #region < Properties >
-
         /// <summary>
-        /// The get entity mapping.
+        ///     The get entity mapping.
         /// </summary>
         /// <param name="context">
-        /// The context.
+        ///     The context.
         /// </param>
         /// <typeparam name="TEntity">
-        /// The entity type.
+        ///     The entity type.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="EntityMapping"/>.
+        ///     The <see cref="EntityMapping" />.
         /// </returns>
         public static EntityMapping GetEntityMapping<TEntity>(this DbContext context) where TEntity : class
         {
@@ -46,39 +44,21 @@
                            TableName = tableName,
                            Keys = keys,
                            Properties = context.GetPropertiesMappings<TEntity>(),
-                           HasIdentity = hasIdentity,
+                           HasIdentity = hasIdentity
                        };
         }
 
         /// <summary>
-        /// The is identity.
-        /// </summary>
-        /// <param name="edmProperty">
-        /// The property.
-        /// </param>
-        /// <returns>
-        /// The <see cref="bool"/>.
-        /// </returns>
-        public static bool IsIdentity(this EdmProperty edmProperty)
-        {
-            // Note the attribute may be set to Computed even though edmProperty.IsStoreGeneratedComputed == false
-            var storeGeneratedPatternAttribute = edmProperty.MetadataProperties.SingleOrDefault(_ => _.Name == "http://schemas.microsoft.com/ado/2009/02/edm/annotation:StoreGeneratedPattern");
-
-            return storeGeneratedPatternAttribute != null
-                   && storeGeneratedPatternAttribute.Value.ToString() == "Identity";
-        }
-
-        /// <summary>
-        /// The get entity properties.
+        ///     The get entity properties.
         /// </summary>
         /// <param name="context">
-        /// The context.
+        ///     The context.
         /// </param>
         /// <typeparam name="TEntity">
-        /// The entity type.
+        ///     The entity type.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="System.Collections.Generic.List{String}"/>.
+        ///     The <see cref="System.Collections.Generic.List{String}" />.
         /// </returns>
         public static List<string> GetEntityProperties<TEntity>(this ObjectContext context) where TEntity : class
         {
@@ -88,18 +68,19 @@
         }
 
         /// <summary>
-        /// The insert with identity insertion.
+        ///     The insert with identity insertion.
         /// </summary>
         /// <param name="dbContext">
-        /// The database context.
+        ///     The database context.
         /// </param>
         /// <param name="entities">
-        /// The entities.
+        ///     The entities.
         /// </param>
         /// <typeparam name="T">
-        /// The type.
+        ///     The type.
         /// </typeparam>
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation", Justification = "Reviewed. Suppression is OK here.")]
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation",
+             Justification = "Reviewed. Suppression is OK here.")]
         public static void InsertWithIdentityInsertion<T>(this DbContext dbContext, List<T> entities) where T : class
         {
             var entityMapping = dbContext.GetEntityMapping<T>();
@@ -128,16 +109,36 @@
         }
 
         /// <summary>
-        /// The SQL representation.
+        ///     The is identity.
         /// </summary>
-        /// <param name="value">
-        /// The value.
+        /// <param name="edmProperty">
+        ///     The property.
         /// </param>
         /// <returns>
-        /// The <see cref="string"/>.
+        ///     The <see cref="bool" />.
+        /// </returns>
+        public static bool IsIdentity(this EdmProperty edmProperty)
+        {
+            // Note the attribute may be set to Computed even though edmProperty.IsStoreGeneratedComputed == false
+            var storeGeneratedPatternAttribute =
+                edmProperty.MetadataProperties.SingleOrDefault(
+                    _ => _.Name == "http://schemas.microsoft.com/ado/2009/02/edm/annotation:StoreGeneratedPattern");
+
+            return (storeGeneratedPatternAttribute != null)
+                   && (storeGeneratedPatternAttribute.Value.ToString() == "Identity");
+        }
+
+        /// <summary>
+        ///     The SQL representation.
+        /// </summary>
+        /// <param name="value">
+        ///     The value.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="string" />.
         /// </returns>
         /// <exception cref="Exception">
-        /// The exception.
+        ///     The exception.
         /// </exception>
         public static string ToSqlRepresentation(this object value)
         {
@@ -172,70 +173,77 @@
         }
 
         /// <summary>
-        /// The get table name.
+        ///     The generate insert.
         /// </summary>
-        /// <param name="context">
-        /// The context.
+        /// <param name="dbContext">
+        ///     The database context.
+        /// </param>
+        /// <param name="entity">
+        ///     The entity.
         /// </param>
         /// <typeparam name="TEntity">
-        /// The entity type.
+        ///     The entity type.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="string"/>.
+        ///     The <see cref="string" />.
         /// </returns>
-        private static string GetTableName<TEntity>(this DbContext context) where TEntity : class
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation",
+             Justification = "Reviewed. Suppression is OK here.")]
+        private static string GenerateInsert<TEntity>(this DbContext dbContext, TEntity entity) where TEntity : class
         {
-            var sql = context.Set<TEntity>().ToString();
-            var regex = new Regex("FROM (?<Table>.*) AS");
-            var match = regex.Match(sql);
+            var mapping = dbContext.GetEntityMapping<TEntity>();
 
-            return match.Groups["Table"].Value;
+            var sql = $"INSERT INTO {mapping.TableName}";
+
+            var propertyNames = (dbContext as IObjectContextAdapter).ObjectContext.GetEntityProperties<TEntity>();
+
+            var propertyInfos =
+                mapping.EntityType.GetProperties()
+                    .Where(p => !p.GetGetMethod().IsVirtual && propertyNames.Contains(p.Name))
+                    .ToArray();
+
+            var columnsPart = new List<string>();
+
+            var valuesPart = new List<string>();
+
+            foreach (var propertyName in propertyNames)
+            {
+                var propertyInfo = propertyInfos.Single(x => x.Name == propertyName);
+
+                columnsPart.Add(mapping.Properties[propertyName]);
+                valuesPart.Add(propertyInfo.GetValue(entity, null).ToSqlRepresentation());
+            }
+
+            sql += $"({string.Join(",", columnsPart)})";
+
+            sql += $" VALUES ({string.Join(",", valuesPart)});";
+
+            return sql;
         }
 
         /// <summary>
-        /// The get property.
+        ///     The get array list property.
         /// </summary>
         /// <param name="property">
-        /// The property.
+        ///     The property.
         /// </param>
         /// <param name="instance">
-        /// The instance.
+        ///     The instance.
         /// </param>
         /// <returns>
-        /// The <see cref="object"/>.
-        /// </returns>
-        private static dynamic GetProperty(string property, object instance)
-        {
-            var type = instance.GetType();
-            return type.InvokeMember(
-                property,
-                BindingFlags.GetProperty | BindingFlags.NonPublic | BindingFlags.Instance,
-                null,
-                instance,
-                null);
-        }
-
-        /// <summary>
-        /// The get array list property.
-        /// </summary>
-        /// <param name="property">
-        /// The property.
-        /// </param>
-        /// <param name="instance">
-        /// The instance.
-        /// </param>
-        /// <returns>
-        /// The <see cref="ArrayList"/>.
+        ///     The <see cref="ArrayList" />.
         /// </returns>
         private static ArrayList GetArrayListProperty(string property, object instance)
         {
             var type = instance.GetType();
-            var objects = (IEnumerable)type.InvokeMember(
-                property,
-                BindingFlags.GetProperty | BindingFlags.NonPublic | BindingFlags.Instance,
-                null,
-                instance,
-                null);
+            var objects =
+                (IEnumerable)
+                type.InvokeMember(
+                    property,
+                    BindingFlags.GetProperty | BindingFlags.NonPublic | BindingFlags.Instance,
+                    null,
+                    instance,
+                    null);
             var array = new ArrayList();
 
             foreach (var obj in objects)
@@ -247,16 +255,16 @@
         }
 
         /// <summary>
-        /// The get properties mappings.
+        ///     The get properties mappings.
         /// </summary>
         /// <param name="context">
-        /// The context.
+        ///     The context.
         /// </param>
         /// <typeparam name="TEntity">
-        /// The entity type.
+        ///     The entity type.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="System.Collections.Generic.Dictionary{String, String}"/>.
+        ///     The <see cref="System.Collections.Generic.Dictionary{String, String}" />.
         /// </returns>
         private static Dictionary<string, string> GetPropertiesMappings<TEntity>(this DbContext context)
         {
@@ -299,53 +307,47 @@
         }
 
         /// <summary>
-        /// The generate insert.
+        ///     The get property.
         /// </summary>
-        /// <param name="dbContext">
-        /// The database context.
+        /// <param name="property">
+        ///     The property.
         /// </param>
-        /// <param name="entity">
-        /// The entity.
+        /// <param name="instance">
+        ///     The instance.
         /// </param>
-        /// <typeparam name="TEntity">
-        /// The entity type.
-        /// </typeparam>
         /// <returns>
-        /// The <see cref="string"/>.
+        ///     The <see cref="object" />.
         /// </returns>
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation", Justification = "Reviewed. Suppression is OK here.")]
-        private static string GenerateInsert<TEntity>(this DbContext dbContext, TEntity entity) where TEntity : class
+        private static dynamic GetProperty(string property, object instance)
         {
-            var mapping = dbContext.GetEntityMapping<TEntity>();
-
-            var sql = $"INSERT INTO {mapping.TableName}";
-
-            var propertyNames = (dbContext as IObjectContextAdapter).ObjectContext.GetEntityProperties<TEntity>();
-
-            var propertyInfos =
-                mapping.EntityType.GetProperties()
-                    .Where(p => !p.GetGetMethod().IsVirtual && propertyNames.Contains(p.Name))
-                    .ToArray();
-
-            var columnsPart = new List<string>();
-
-            var valuesPart = new List<string>();
-
-            foreach (var propertyName in propertyNames)
-            {
-                var propertyInfo = propertyInfos.Single(x => x.Name == propertyName);
-
-                columnsPart.Add(mapping.Properties[propertyName]);
-                valuesPart.Add(propertyInfo.GetValue(entity, null).ToSqlRepresentation());
-            }
-
-            sql += $"({string.Join(",", columnsPart)})";
-
-            sql += $" VALUES ({string.Join(",", valuesPart)});";
-
-            return sql;
+            var type = instance.GetType();
+            return type.InvokeMember(
+                property,
+                BindingFlags.GetProperty | BindingFlags.NonPublic | BindingFlags.Instance,
+                null,
+                instance,
+                null);
         }
 
-        #endregion
+        /// <summary>
+        ///     The get table name.
+        /// </summary>
+        /// <param name="context">
+        ///     The context.
+        /// </param>
+        /// <typeparam name="TEntity">
+        ///     The entity type.
+        /// </typeparam>
+        /// <returns>
+        ///     The <see cref="string" />.
+        /// </returns>
+        private static string GetTableName<TEntity>(this DbContext context) where TEntity : class
+        {
+            var sql = context.Set<TEntity>().ToString();
+            var regex = new Regex("FROM (?<Table>.*) AS");
+            var match = regex.Match(sql);
+
+            return match.Groups["Table"].Value;
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace EFFlow.EFGiven
+﻿namespace EfFlow.EfGiven
 {
     using System;
     using System.Linq;
@@ -7,24 +7,24 @@
     using TechTalk.SpecFlow;
 
     /// <summary>
-    /// The helpers.
+    ///     The helpers.
     /// </summary>
     public static class Helpers
     {
         /// <summary>
-        /// The create instance.
+        ///     The create instance.
         /// </summary>
         /// <param name="table">
-        /// The table.
+        ///     The table.
         /// </param>
         /// <param name="tableRow">
-        /// The table row.
+        ///     The table row.
         /// </param>
         /// <param name="type">
-        /// The type.
+        ///     The type.
         /// </param>
         /// <returns>
-        /// The <see cref="object"/>.
+        ///     The <see cref="object" />.
         /// </returns>
         public static object CreateInstance(Table table, TableRow tableRow, Type type)
         {
@@ -35,13 +35,13 @@
         }
 
         /// <summary>
-        /// The get default.
+        ///     The get default.
         /// </summary>
         /// <param name="type">
-        /// The type.
+        ///     The type.
         /// </param>
         /// <returns>
-        /// The <see cref="object"/>.
+        ///     The <see cref="object" />.
         /// </returns>
         public static object GetDefault(Type type)
         {
@@ -59,10 +59,10 @@
         }
 
         /// <summary>
-        /// The replace date time minimum values.
+        ///     The replace date time minimum values.
         /// </summary>
         /// <param name="entity">
-        /// The entity.
+        ///     The entity.
         /// </param>
         public static void ReplaceDateTimeMinimumValues(object entity)
         {

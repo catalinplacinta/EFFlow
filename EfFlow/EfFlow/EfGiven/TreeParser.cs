@@ -1,4 +1,4 @@
-﻿namespace EFFlow.EFGiven
+﻿namespace EfFlow.EfGiven
 {
     using System;
     using System.Collections.Generic;
@@ -7,37 +7,31 @@
     using TechTalk.SpecFlow;
 
     /// <summary>
-    /// The tree parser.
+    ///     The tree parser.
     /// </summary>
     public class TreeParser
     {
-        #region < Fields >
-
         /// <summary>
-        /// The columns.
+        ///     The columns.
         /// </summary>
-        private List<string> columns;
+        private readonly List<string> columns;
 
         /// <summary>
-        /// The table.
+        ///     The table.
         /// </summary>
-        private Table table;
-
-        #endregion
-
-        #region < Constructors >
+        private readonly Table table;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TreeParser"/> class.
+        ///     Initializes a new instance of the <see cref="TreeParser" /> class.
         /// </summary>
         /// <param name="table">
-        /// The table.
+        ///     The table.
         /// </param>
         /// <param name="columns">
-        /// The columns.
+        ///     The columns.
         /// </param>
         /// <exception cref="Exception">
-        /// The exception.
+        ///     The exception.
         /// </exception>
         public TreeParser(Table table, List<string> columns)
         {
@@ -53,18 +47,14 @@
             }
         }
 
-        #endregion
-
-        #region < Methods >
-
         /// <summary>
-        /// The parse.
+        ///     The parse.
         /// </summary>
         /// <returns>
-        /// The <see cref="System.Collections.Generic.Dictionary{Int, RowInfo}"/>.
+        ///     The <see cref="System.Collections.Generic.Dictionary{Int, RowInfo}" />.
         /// </returns>
         /// <exception cref="Exception">
-        /// The exception.
+        ///     The exception.
         /// </exception>
         public Dictionary<int, RowInfo> Parse()
         {
@@ -75,7 +65,7 @@
             {
                 for (var i = 0; i < this.table.RowCount; i++)
                 {
-                    rowInfos.Add(i, new RowInfo { HierarchyLevel = 0, Parent = null, RowKey = rowKeys[i], });
+                    rowInfos.Add(i, new RowInfo { HierarchyLevel = 0, Parent = null, RowKey = rowKeys[i] });
                 }
 
                 return rowInfos;
@@ -147,46 +137,20 @@
 
                 rowInfos.Add(
                     i,
-                    new RowInfo { HierarchyLevel = hierarchyLevel, Parent = parentRowInfo, RowKey = rowKeys[i], });
+                    new RowInfo { HierarchyLevel = hierarchyLevel, Parent = parentRowInfo, RowKey = rowKeys[i] });
             }
 
             return rowInfos;
         }
 
         /// <summary>
-        /// The get row keys.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="System.Collections.Generic.List{String}"/>.
-        /// </returns>
-        private List<string[]> GetRowKeys()
-        {
-            var rowKeys = new List<string[]>();
-
-            foreach (var tableRow in this.table.Rows)
-            {
-                var rowKey = new string[this.columns.Count];
-
-                rowKeys.Add(rowKey);
-
-                for (var j = 0; j < this.columns.Count; j++)
-                {
-                    var headerName = this.columns[j];
-                    rowKey[j] = tableRow[headerName];
-                }
-            }
-
-            return rowKeys;
-        }
-
-        /// <summary>
-        /// The check first line.
+        ///     The check first line.
         /// </summary>
         /// <param name="rowKey">
-        /// The row key.
+        ///     The row key.
         /// </param>
         /// <returns>
-        /// The <see cref="bool"/>.
+        ///     The <see cref="bool" />.
         /// </returns>
         private bool CheckFirstLine(string[] rowKey)
         {
@@ -220,6 +184,30 @@
             return true;
         }
 
-        #endregion
+        /// <summary>
+        ///     The get row keys.
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="System.Collections.Generic.List{String}" />.
+        /// </returns>
+        private List<string[]> GetRowKeys()
+        {
+            var rowKeys = new List<string[]>();
+
+            foreach (var tableRow in this.table.Rows)
+            {
+                var rowKey = new string[this.columns.Count];
+
+                rowKeys.Add(rowKey);
+
+                for (var j = 0; j < this.columns.Count; j++)
+                {
+                    var headerName = this.columns[j];
+                    rowKey[j] = tableRow[headerName];
+                }
+            }
+
+            return rowKeys;
+        }
     }
 }
